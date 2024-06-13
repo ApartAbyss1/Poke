@@ -9,6 +9,10 @@
 #define OW_TIMES_OF_DAY                 GEN_LATEST // Different generations have the times of day change at different times.
 #define OW_DOUBLE_APPROACH_WITH_ONE_MON FALSE      // If enabled, you can be spotted by two trainers at the same time even if you only have one eligible Pokémon in your party.
 #define OW_HIDE_REPEAT_MAP_POPUP        FALSE      // If enabled, map popups will not appear if entering a map with the same Map Section Id as the last.
+#define OW_SHOW_ITEM_DESCRIPTIONS       0          // If enabled, item descriptions/images will be shown when finding items.
+//                                      0 = off
+//                                      1 = show first time (** SAVE-BREAKING - see struct SaveBlock3 **)
+//                                      2 = always show
 
 // These generational defines only make a distinction for Berries and the OW_PC_MOVE_ORDER
 #define GEN_6_XY GEN_6

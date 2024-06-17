@@ -8,6 +8,16 @@
 // Ruby's actual debug build does not use the AGBPrint features.
 #define NDEBUG
 
+#ifdef DEBUG_TARGET
+#ifndef DEBUG_PRINT
+#define DEBUG_PRINT
+#endif
+#endif
+
+#ifdef DEBUG_PRINT
+#undef NDEBUG
+#endif
+
 // To enable printf debugging, comment out "#define NDEBUG". This allows
 // the various AGBPrint functions to be used. (See include/gba/isagbprint.h).
 // See below for enabling different pretty printing versions.

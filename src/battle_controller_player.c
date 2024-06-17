@@ -413,13 +413,11 @@ static void HandleInputChooseAction(u32 battler)
     {
         SwapHpBarsWithHpText();
     }
-#if DEBUG_BATTLE_MENU == TRUE
-    else if (JOY_NEW(SELECT_BUTTON))
+    else if (DEBUG_BATTLE_MENU && JOY_NEW(SELECT_BUTTON))
     {
         BtlController_EmitTwoReturnValues(battler, BUFFER_B, B_ACTION_DEBUG, 0);
         PlayerBufferExecCompleted(battler);
     }
-#endif
 #if B_LAST_USED_BALL == TRUE && B_LAST_USED_BALL_CYCLE == FALSE
     else if (JOY_NEW(B_LAST_USED_BALL_BUTTON) && CanThrowLastUsedBall())
     {

@@ -44,6 +44,7 @@ MODERN       ?= 1
 TEST         ?= 0
 ANALYZE      ?= 0
 UNUSED_ERROR ?= 0
+DEBUG        ?= 0
 
 ifeq (agbcc,$(MAKECMDGOALS))
   MODERN := 0
@@ -51,6 +52,10 @@ endif
 
 ifeq (check,$(MAKECMDGOALS))
   TEST := 1
+endif
+
+ifeq (debug,$(MAKECMDGOALS))
+  DEBUG := 1
 endif
 
 # use arm-none-eabi-cpp for macOS
@@ -89,10 +94,15 @@ SYM = $(ROM:.gba=.sym)
 TEST_OBJ_DIR_NAME_MODERN := build/modern-test
 TEST_OBJ_DIR_NAME_AGBCC := build/test
 
+DEBUG_OBJ_DIR_NAME_MODERN := build/modern-debug
+DEBUG_OBJ_DIR_NAME_AGBCC := build/debug
+
 ifeq ($(MODERN),0)
 TEST_OBJ_DIR_NAME := $(TEST_OBJ_DIR_NAME_AGBCC)
+DEBUG_OBJ_DIR_NAME := $(DEBUG_OBJ_DIR_NAME_AGBCC)
 else
 TEST_OBJ_DIR_NAME := $(TEST_OBJ_DIR_NAME_MODERN)
+DEBUG_OBJ_DIR_NAME := $(DEBUG_OBJ_DIR_NAME_MODERN)
 endif
 TESTELF = $(ROM:.gba=-test.elf)
 HEADLESSELF = $(ROM:.gba=-test-headless.elf)
@@ -120,14 +130,14 @@ ASFLAGS := -mcpu=arm7tdmi --defsym MODERN=$(MODERN)
 
 ifeq ($(MODERN),0)
 CC1             := tools/agbcc/bin/agbcc$(EXE)
-override CFLAGS += -mthumb-interwork -Wimplicit -Wparentheses -Werror -O2 -fhex-asm -g
+override CFLAGS += -mthumb-interwork -Wimplicit -Wparentheses -Werror -fhex-asm
 ROM := $(ROM_NAME)
 OBJ_DIR := $(OBJ_DIR_NAME)
 LIBPATH := -L ../../tools/agbcc/lib
 LIB := $(LIBPATH) -lgcc -lc -L../../libagbsyscall -lagbsyscall
 else
 CC1              = $(shell $(PATH_MODERNCC) --print-prog-name=cc1) -quiet
-override CFLAGS += -mthumb -mthumb-interwork -O2 -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast -std=gnu17 -Werror -Wall -Wno-strict-aliasing -Wno-attribute-alias -Woverride-init
+override CFLAGS += -mthumb -mthumb-interwork -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast -std=gnu17 -Werror -Wall -Wno-strict-aliasing -Wno-attribute-alias -Woverride-init
 ifeq ($(ANALYZE),1)
 override CFLAGS += -fanalyzer
 endif
@@ -143,6 +153,16 @@ LIBPATH := -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libgcc.a)
 LIB := $(LIBPATH) -lc -lnosys -lgcc -L../../libagbsyscall -lagbsyscall
 endif
 
+ifeq ($(DEBUG),1)
+ifeq ($(MODERN),1)
+override CFLAGS += -Og -g
+else
+override CFLAGS += -O1 -g
+endif
+else
+override CFLAGS += -O2
+endif
+
 ifeq ($(TESTELF),$(MAKECMDGOALS))
   TEST := 1
 endif
@@ -150,10 +170,18 @@ endif
 ifeq ($(TEST),1)
 OBJ_DIR := $(TEST_OBJ_DIR_NAME)
 endif
+ifeq ($(DEBUG),1)
+OBJ_DIR := $(DEBUG_OBJ_DIR_NAME)
+endif
+
 
 CPPFLAGS := -iquote include -iquote $(GFLIB_SUBDIR) -Wno-trigraphs -DMODERN=$(MODERN) -DTESTING=$(TEST)
 ifneq ($(MODERN),1)
 CPPFLAGS += -I tools/agbcc/include -I tools/agbcc -nostdinc -undef
+endif
+
+ifeq ($(DEBUG),1)
+CPPFLAGS += -DDEBUG_TARGET
 endif
 
 SHA1 := $(shell { command -v sha1sum || command -v shasum; } 2>/dev/null) -c
@@ -191,7 +219,7 @@ MAKEFLAGS += --no-print-directory
 # Secondary expansion is required for dependency variables in object rules.
 .SECONDEXPANSION:
 
-.PHONY: all rom clean compare tidy tools check-tools mostlyclean clean-tools clean-check-tools $(TOOLDIRS) $(CHECKTOOLDIRS) libagbsyscall agbcc modern tidymodern tidynonmodern check history
+.PHONY: all rom clean compare tidy tools check-tools mostlyclean clean-tools clean-check-tools $(TOOLDIRS) $(CHECKTOOLDIRS) libagbsyscall agbcc modern tidymodern tidynonmodern check history debug
 
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
 
@@ -199,7 +227,7 @@ infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst 
 # Disable dependency scanning for clean/tidy/tools
 # Use a separate minimal makefile for speed
 # Since we don't need to reload most of this makefile
-ifeq (,$(filter-out all rom compare agbcc modern check libagbsyscall syms $(TESTELF),$(MAKECMDGOALS)))
+ifeq (,$(filter-out all rom compare agbcc modern check libagbsyscall syms $(TESTELF) debug,$(MAKECMDGOALS)))
 $(call infoshell, $(MAKE) -f make_tools.mk)
 else
 NODEP ?= 1
@@ -291,7 +319,7 @@ clean-tools:
 clean-check-tools:
 	@$(foreach tooldir,$(CHECKTOOLDIRS),$(MAKE) clean -C $(tooldir);)
 
-mostlyclean: tidynonmodern tidymodern tidycheck
+mostlyclean: tidynonmodern tidymodern tidycheck tidydebug
 	find sound -iname '*.bin' -exec rm {} +
 	rm -f $(MID_SUBDIR)/*.s
 	find . \( -iname '*.1bpp' -o -iname '*.4bpp' -o -iname '*.8bpp' -o -iname '*.gbapal' -o -iname '*.lz' -o -iname '*.rl' -o -iname '*.latfont' -o -iname '*.hwjpnfont' -o -iname '*.fwjpnfont' \) -exec rm {} +
@@ -301,7 +329,7 @@ mostlyclean: tidynonmodern tidymodern tidycheck
 	rm -f $(AUTO_GEN_TARGETS)
 	@$(MAKE) clean -C libagbsyscall
 
-tidy: tidynonmodern tidymodern tidycheck
+tidy: tidynonmodern tidymodern tidycheck tidydebug
 
 tidynonmodern:
 	rm -f $(ROM_NAME) $(ELF_NAME) $(MAP_NAME)
@@ -316,6 +344,10 @@ tidycheck:
 	rm -rf $(TEST_OBJ_DIR_NAME_MODERN)
 	rm -rf $(TEST_OBJ_DIR_NAME_AGBCC)
 
+
+tidydebug:
+	rm -rf $(DEBUG_OBJ_DIR_NAME_MODERN)
+	rm -rf $(DEBUG_OBJ_DIR_NAME_AGBCC)
 
 ifneq ($(MODERN),0)
 $(C_BUILDDIR)/berry_crush.o: override CFLAGS += -Wno-address-of-packed-member
@@ -373,6 +405,15 @@ endif
 
 ifeq ($(DINFO),1)
 override CFLAGS += -g
+endif
+
+ifeq ($(NOOPT),1)
+override CFLAGS := $(filter-out -O1 -Og -O2,$(CFLAGS))
+override CFLAGS += -O0
+endif
+
+ifeq ($(DPRINT),1)
+override CPPFLAGS += -DDEBUG_PRINT
 endif
 
 # The dep rules have to be explicit or else missing files won't be reported.
@@ -512,6 +553,8 @@ $(ROM): $(ELF)
 agbcc: all
 
 modern: all
+
+debug: all
 
 LD_SCRIPT_TEST := ld_script_test.ld
 

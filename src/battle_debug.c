@@ -180,10 +180,15 @@ static const u8 sText_HeldItem[] = _("Held Item");
 static const u8 sText_SideStatus[] = _("Side Status");
 static const u8 sText_MaxHp[] = _("HP Max");
 static const u8 sText_CurrHp[] = _("HP Current");
+static const u8 sText_Sleep[] = _("Sleep");
+static const u8 sText_Poison[] = _("Poison");
+static const u8 sText_Burn[] = _("Burn");
 static const u8 sText_Freeze[] = _("Freeze");
-static const u8 sText_Frostbite[] = _("Frostbite");
+static const u8 sText_Paralysis[] = _("Paralysis");
 static const u8 sText_ToxicPoison[] = _("Toxic Poison");
 static const u8 sText_ToxicCounter[] = _("Toxic Counter");
+static const u8 sText_Frostbite[] = _("Frostbite");
+static const u8 sText_Drowsy[] = _("Drowsy");
 static const u8 sText_Flinch[] = _("Flinch");
 static const u8 sText_Uproar[] = _("Uproar");
 static const u8 sText_Bide[] = _("Bide");
@@ -260,6 +265,7 @@ static const struct BitfieldInfo sStatus1Bitfield[] =
     {/*Toxic Poison*/ 1, 7},
     {/*Toxic Counter*/ 4, 8},
     {/*Frostbite*/ 1, 12},
+    {/*Drowsy*/ 1, 13},
 };
 
 static const struct BitfieldInfo sStatus2Bitfield[] =
@@ -392,14 +398,15 @@ static const struct ListMenuItem sStatsListItems[] =
 
 static const struct ListMenuItem sStatus1ListItems[] =
 {
-    {gText_Sleep, 0},
-    {gText_Poison, 1},
-    {gText_Burn, 2},
+    {sText_Sleep, 0},
+    {sText_Poison, 1},
+    {sText_Burn, 2},
     {sText_Freeze, 3},
-    {gText_Paralysis, 4},
+    {sText_Paralysis, 4},
     {sText_ToxicPoison, 5},
     {sText_ToxicCounter, 6},
     {sText_Frostbite, 7},
+    {sText_Drowsy, 8},
 };
 
 static const struct ListMenuItem sStatus2ListItems[] =

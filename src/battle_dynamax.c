@@ -485,7 +485,7 @@ static u32 GetMaxMoveStatusEffect(u32 move)
         }
         case MAX_EFFECT_EFFECT_SPORE_FOES:
         {
-            static const u8 sBefuddleEffects[] = {STATUS1_PARALYSIS, STATUS1_POISON, STATUS1_SLEEP};
+            static const u8 sBefuddleEffects[] = {STATUS1_PARALYSIS, STATUS1_POISON, B_USE_DROWSY == TRUE ? STATUS1_DROWSY : STATUS1_SLEEP};
             return RandomElement(RNG_G_MAX_BEFUDDLE, sBefuddleEffects);
         }
         // Status 2
@@ -877,6 +877,14 @@ void BS_TrySetStatus1(void)
             {
                 gBattleMons[gBattlerTarget].status1 |= STATUS1_PARALYSIS;
                 gBattleCommunication[MULTISTRING_CHOOSER] = 3;
+                effect++;
+            }
+            break;
+        case STATUS1_DROWSY:
+            if (CanBeDrowsy(gBattlerTarget))
+            {
+                gBattleMons[gBattlerTarget].status1 |= STATUS1_DROWSY;
+                gBattleCommunication[MULTISTRING_CHOOSER] = 6;
                 effect++;
             }
             break;

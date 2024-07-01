@@ -317,8 +317,9 @@ Debug_EventScript_InflictStatus1_Single:
 	dynmultipush Debug_EventScript_InflictStatus1_Text_Burn, 3
 	dynmultipush Debug_EventScript_InflictStatus1_Text_Freeze, 4
 	dynmultipush Debug_EventScript_InflictStatus1_Text_Frostbite, 5
-	dynmultipush Debug_EventScript_InflictStatus1_Text_Close, 6
-	dynmultistack 0, 0, FALSE, 7, FALSE, 0, NULL
+	dynmultipush Debug_EventScript_InflictStatus1_Text_Drowsy, 6
+	dynmultipush Debug_EventScript_InflictStatus1_Text_Close, 7
+	dynmultistack 0, 0, FALSE, 8, FALSE, 0, NULL
 	switch VAR_RESULT
 	case 0, Debug_EventScript_InflictStatus1_Single_Poison
 	case 1, Debug_EventScript_InflictStatus1_Single_Paralysis
@@ -326,7 +327,8 @@ Debug_EventScript_InflictStatus1_Single:
 	case 3, Debug_EventScript_InflictStatus1_Single_Burn
 	case 4, Debug_EventScript_InflictStatus1_Single_Freeze
 	case 5, Debug_EventScript_InflictStatus1_Single_Frostbite
-	case 6, Debug_EventScript_InflictStatus1_Close
+	case 6, Debug_EventScript_InflictStatus1_Single_Drowsy
+	case 7, Debug_EventScript_InflictStatus1_Close
 	case MULTI_B_PRESSED, Debug_EventScript_InflictStatus1_Close
 	releaseall
 	end
@@ -361,6 +363,11 @@ Debug_EventScript_InflictStatus1_Single_Frostbite:
 	releaseall
 	end
 
+Debug_EventScript_InflictStatus1_Single_Drowsy:
+	setstatus1 STATUS1_DROWSY, VAR_0x8004
+	releaseall
+	end
+
 Debug_EventScript_InflictStatus1_Party:
 	dynmultipush Debug_EventScript_InflictStatus1_Text_Poison, 0
 	dynmultipush Debug_EventScript_InflictStatus1_Text_Paralysis, 1
@@ -368,8 +375,9 @@ Debug_EventScript_InflictStatus1_Party:
 	dynmultipush Debug_EventScript_InflictStatus1_Text_Burn, 3
 	dynmultipush Debug_EventScript_InflictStatus1_Text_Freeze, 4
 	dynmultipush Debug_EventScript_InflictStatus1_Text_Frostbite, 5
-	dynmultipush Debug_EventScript_InflictStatus1_Text_Close, 6
-	dynmultistack 0, 0, FALSE, 7, FALSE, 0, NULL
+	dynmultipush Debug_EventScript_InflictStatus1_Text_Drowsy, 6
+	dynmultipush Debug_EventScript_InflictStatus1_Text_Close, 7
+	dynmultistack 0, 0, FALSE, 8, FALSE, 0, NULL
 	switch VAR_RESULT
 	case 0, Debug_EventScript_InflictStatus1_Party_Poison
 	case 1, Debug_EventScript_InflictStatus1_Party_Paralysis
@@ -377,7 +385,8 @@ Debug_EventScript_InflictStatus1_Party:
 	case 3, Debug_EventScript_InflictStatus1_Party_Burn
 	case 4, Debug_EventScript_InflictStatus1_Party_Freeze
 	case 5, Debug_EventScript_InflictStatus1_Party_Frostbite
-	case 6, Debug_EventScript_InflictStatus1_Close
+	case 6, Debug_EventScript_InflictStatus1_Party_Drowsy
+	case 7, Debug_EventScript_InflictStatus1_Close
 	case MULTI_B_PRESSED, Debug_EventScript_InflictStatus1_Close
 	releaseall
 	end
@@ -412,6 +421,11 @@ Debug_EventScript_InflictStatus1_Party_Frostbite:
 	releaseall
 	end
 
+Debug_EventScript_InflictStatus1_Party_Drowsy:
+	setstatus1 STATUS1_DROWSY, PARTY_SIZE
+	releaseall
+	end
+
 Debug_EventScript_InflictStatus1_Text_Single:
 	.string "Single$"
 
@@ -439,4 +453,6 @@ Debug_EventScript_InflictStatus1_Text_Freeze:
 Debug_EventScript_InflictStatus1_Text_Frostbite:
 	.string "Frostbite$"
 
+Debug_EventScript_InflictStatus1_Text_Drowsy:
+	.string "Drowsy$"
 .endif

@@ -883,6 +883,7 @@ static const u32 sStatusFlagsForMoveEffects[NUM_MOVE_EFFECTS] =
     [MOVE_EFFECT_PARALYSIS]      = STATUS1_PARALYSIS,
     [MOVE_EFFECT_TOXIC]          = STATUS1_TOXIC_POISON,
     [MOVE_EFFECT_FROSTBITE]      = STATUS1_FROSTBITE,
+    [MOVE_EFFECT_DROWSY]         = STATUS1_DROWSY,
     [MOVE_EFFECT_CONFUSION]      = STATUS2_CONFUSION,
     [MOVE_EFFECT_FLINCH]         = STATUS2_FLINCHED,
     [MOVE_EFFECT_UPROAR]         = STATUS2_UPROAR,
@@ -907,6 +908,7 @@ static const u8 *const sMoveEffectBS_Ptrs[] =
     [MOVE_EFFECT_PAYDAY]           = BattleScript_MoveEffectPayDay,
     [MOVE_EFFECT_WRAP]             = BattleScript_MoveEffectWrap,
     [MOVE_EFFECT_FROSTBITE]        = BattleScript_MoveEffectFrostbite,
+    [MOVE_EFFECT_DROWSY]           = BattleScript_MoveEffectDrowsy,
 };
 
 static const struct WindowTemplate sUnusedWinTemplate =
@@ -3072,6 +3074,25 @@ void SetMoveEffect(bool32 primary, bool32 certain)
 
             statusChanged = TRUE;
             break;
+        case STATUS1_DROWSY:
+            // check active uproar
+            if (battlerAbility != ABILITY_SOUNDPROOF || B_UPROAR_IGNORE_SOUNDPROOF >= GEN_5)
+            {
+                for (i = 0; i < gBattlersCount && !(gBattleMons[i].status2 & STATUS2_UPROAR); i++)
+                    ;
+            }
+            else
+            {
+                i = gBattlersCount;
+            }
+
+            if (i != gBattlersCount)
+                break;
+            if (!CanBeDrowsy(gEffectBattler))
+                break;
+
+            statusChanged = TRUE;
+            break;
         }
         if (statusChanged == TRUE)
         {
@@ -3662,7 +3683,7 @@ void SetMoveEffect(bool32 primary, bool32 certain)
             case MOVE_EFFECT_DIRE_CLAW:
                 if (!gBattleMons[gEffectBattler].status1)
                 {
-                    static const u8 sDireClawEffects[] = { MOVE_EFFECT_POISON, MOVE_EFFECT_PARALYSIS, MOVE_EFFECT_SLEEP };
+                    static const u8 sDireClawEffects[] = { MOVE_EFFECT_POISON, MOVE_EFFECT_PARALYSIS, MOVE_EFFECT_SLEEP_OR_DROWSY };
                     gBattleScripting.moveEffect = RandomElement(RNG_DIRE_CLAW, sDireClawEffects);
                     SetMoveEffect(primary, certain);
                 }
@@ -3709,7 +3730,7 @@ void SetMoveEffect(bool32 primary, bool32 certain)
                         gBattleScripting.moveEffect = MOVE_EFFECT_SP_ATK_MINUS_1;
                         break;
                     case STATUS_FIELD_GRASSY_TERRAIN:
-                        gBattleScripting.moveEffect = MOVE_EFFECT_SLEEP;
+                        gBattleScripting.moveEffect = MOVE_EFFECT_SLEEP_OR_DROWSY;
                         break;
                     case STATUS_FIELD_ELECTRIC_TERRAIN:
                         gBattleScripting.moveEffect = MOVE_EFFECT_PARALYSIS;
@@ -3727,7 +3748,7 @@ void SetMoveEffect(bool32 primary, bool32 certain)
                     switch (gBattleTerrain)
                     {
                     case BATTLE_TERRAIN_GRASS:
-                        gBattleScripting.moveEffect = (B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_SLEEP : MOVE_EFFECT_POISON);
+                        gBattleScripting.moveEffect = (B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_SLEEP_OR_DROWSY : MOVE_EFFECT_POISON);
                         break;
                     case BATTLE_TERRAIN_UNDERWATER:
                         gBattleScripting.moveEffect = (B_SECRET_POWER_EFFECT >= GEN_6 ? MOVE_EFFECT_ATK_MINUS_1 : MOVE_EFFECT_DEF_MINUS_1);
@@ -3747,7 +3768,7 @@ void SetMoveEffect(bool32 primary, bool32 certain)
                         gBattleScripting.moveEffect = (B_SECRET_POWER_EFFECT >= GEN_5 ? MOVE_EFFECT_SPD_MINUS_1 : MOVE_EFFECT_ACC_MINUS_1);
                         break;
                     case BATTLE_TERRAIN_LONG_GRASS:
-                        gBattleScripting.moveEffect = MOVE_EFFECT_SLEEP;
+                        gBattleScripting.moveEffect = MOVE_EFFECT_SLEEP_OR_DROWSY;
                         break;
                     case BATTLE_TERRAIN_SAND:
                         gBattleScripting.moveEffect = MOVE_EFFECT_ACC_MINUS_1;
@@ -5704,6 +5725,9 @@ static void Cmd_moveend(void)
                         break;
                     case STATUS1_SLEEP:
                         gBattlescriptCurrInstr = BattleScript_TargetWokeUp;
+                        break;
+                    case STATUS1_DROWSY:
+                        gBattlescriptCurrInstr = BattleScript_TargetFoughtOffDrowsiness;
                         break;
                     case STATUS1_BURN:
                         gBattlescriptCurrInstr = BattleScript_TargetBurnHeal;
@@ -9927,6 +9951,8 @@ static void Cmd_various(void)
                 gBattleCommunication[MULTISTRING_CHOOSER] = 4;
             else if ((gBattleMons[gBattlerAttacker].status1 & STATUS1_FROSTBITE) && CanBeFrozen(gBattlerTarget))
                 gBattleCommunication[MULTISTRING_CHOOSER] = 5;
+            else if ((gBattleMons[gBattlerAttacker].status1 & STATUS1_DROWSY) && CanBeDrowsy(gBattlerTarget))
+                gBattleCommunication[MULTISTRING_CHOOSER] = 6;
             else
             {
                 gBattlescriptCurrInstr = cmd->failInstr;
@@ -11283,12 +11309,24 @@ static void Cmd_trysetrest(void)
     }
     else
     {
-        if (gBattleMons[gBattlerTarget].status1 & ((u8)(~STATUS1_SLEEP)))
-            gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_REST_STATUSED;
-        else
-            gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_REST;
+        if (B_USE_DROWSY)
+        {
+            if (gBattleMons[gBattlerTarget].status1 & ((u8)(~STATUS1_DROWSY)))
+                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_REST_STATUSED;
+            else
+                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_REST;
 
-        gBattleMons[gBattlerTarget].status1 = STATUS1_SLEEP_TURN(3);
+            gBattleMons[gBattlerTarget].status1 = STATUS1_DROWSY;
+        }
+        else
+        {
+            if (gBattleMons[gBattlerTarget].status1 & ((u8)(~STATUS1_SLEEP)))
+                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_REST_STATUSED;
+            else
+                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_REST;
+
+            gBattleMons[gBattlerTarget].status1 = STATUS1_SLEEP_TURN(3);
+        }
         BtlController_EmitSetMonData(gBattlerTarget, BUFFER_A, REQUEST_STATUS_BATTLE, 0, sizeof(gBattleMons[gBattlerTarget].status1), &gBattleMons[gBattlerTarget].status1);
         MarkBattlerForControllerExec(gBattlerTarget);
         gBattlescriptCurrInstr = cmd->nextInstr;
@@ -13994,7 +14032,7 @@ static void Cmd_cureifburnedparalysedorpoisoned(void)
 {
     CMD_ARGS(const u8 *failInstr);
 
-    if (gBattleMons[gBattlerAttacker].status1 & (STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON | STATUS1_FROSTBITE))
+    if (gBattleMons[gBattlerAttacker].status1 & (STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON | STATUS1_FROSTBITE | STATUS1_DROWSY ))
     {
         gBattleMons[gBattlerAttacker].status1 = 0;
         gBattlescriptCurrInstr = cmd->nextInstr;
@@ -15175,7 +15213,7 @@ static void Cmd_handleballthrow(void)
                 }
                 break;
             case ITEM_DREAM_BALL:
-                if (B_DREAM_BALL_MODIFIER >= GEN_8 && (gBattleMons[gBattlerTarget].status1 & STATUS1_SLEEP || GetBattlerAbility(gBattlerTarget) == ABILITY_COMATOSE))
+                if (B_DREAM_BALL_MODIFIER >= GEN_8 && (gBattleMons[gBattlerTarget].status1 & (STATUS1_SLEEP | STATUS1_DROWSY) || GetBattlerAbility(gBattlerTarget) == ABILITY_COMATOSE))
                     ballMultiplier = 400;
                 break;
             case ITEM_BEAST_BALL:
@@ -15196,7 +15234,7 @@ static void Cmd_handleballthrow(void)
 
         if (gBattleMons[gBattlerTarget].status1 & (STATUS1_SLEEP | STATUS1_FREEZE))
             odds *= 2;
-        if (gBattleMons[gBattlerTarget].status1 & (STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON | STATUS1_FROSTBITE))
+        if (gBattleMons[gBattlerTarget].status1 & (STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON | STATUS1_FROSTBITE | STATUS1_DROWSY))
             odds = (odds * 15) / 10;
 
         if (gBattleResults.catchAttempts[gLastUsedItem - FIRST_BALL] < 255)

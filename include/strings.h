@@ -1048,18 +1048,6 @@ extern const u8 gText_WhichPCShouldBeAccessed[];
 extern const u8 gText_PokenavMatchCall_Strategy[];
 extern const u8 gText_PokenavMatchCall_TrainerPokemon[];
 extern const u8 gText_PokenavMatchCall_SelfIntroduction[];
-extern const u8 gText_Pokenav_ClearButtonList[];
-extern const u8 gText_PokenavMap_ZoomedOutButtons[];
-extern const u8 gText_PokenavMap_ZoomedInButtons[];
-extern const u8 gText_PokenavCondition_MonListButtons[];
-extern const u8 gText_PokenavCondition_MonStatusButtons[];
-extern const u8 gText_PokenavCondition_MarkingButtons[];
-extern const u8 gText_PokenavMatchCall_TrainerListButtons[];
-extern const u8 gText_PokenavMatchCall_CallMenuButtons[];
-extern const u8 gText_PokenavMatchCall_CheckTrainerButtons[];
-extern const u8 gText_PokenavRibbons_MonListButtons[];
-extern const u8 gText_PokenavRibbons_RibbonListButtons[];
-extern const u8 gText_PokenavRibbons_RibbonCheckButtons[];
 extern const u8 gText_Number2[];
 
 extern const u8 gText_Petalburg[];

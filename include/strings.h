@@ -2925,9 +2925,6 @@ extern const u8 gText_NumberRegistered[];
 extern const u8 gText_NumberOfBattles[];
 extern const u8 gText_Unknown[];
 extern const u8 gText_TrainerCloseBy[];
-extern const u8 gText_Call[];
-extern const u8 gText_Check[];
-extern const u8 gText_Cancel6[];
 
 // PokéNav Menu Handler
 extern const u8 gText_CheckMapOfHoenn[];

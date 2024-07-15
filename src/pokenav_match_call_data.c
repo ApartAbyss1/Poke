@@ -255,6 +255,8 @@ static const struct MatchCallStructNPC sStevenMatchCallHeader =
     .textData = sStevenTextScripts
 };
 
+static const u8 gText_MayBrendanMatchCallDesc[] = _("RAD NEIGHBOR");
+
 static const match_call_text_data_t sMayTextScripts[] = {
     { MatchCall_Text_May1,  0xFFFF,                              0xFFFF },
     { MatchCall_Text_May2,  FLAG_DEFEATED_DEWFORD_GYM,           0xFFFF },
@@ -496,6 +498,8 @@ static const struct MatchCallStructTrainer sJuanMatchCallHeader =
     .name = NULL,
     .textData = sJuanTextScripts
 };
+
+static const u8 gText_EliteFourMatchCallDesc[] = _("ELITE FOUR");
 
 static const match_call_text_data_t sSidneyTextScripts[] = {
     { MatchCall_Text_Sidney, 0xFFFF, 0xFFFF },

@@ -2502,8 +2502,6 @@ extern const u8 MatchCall_Text_Phoebe[];
 extern const u8 MatchCall_Text_Glacia[];
 extern const u8 MatchCall_Text_Drake[];
 extern const u8 MatchCall_Text_Wallace[];
-extern const u8 gText_MayBrendanMatchCallDesc[];
-extern const u8 gText_EliteFourMatchCallDesc[];
 extern const u8 gText_MatchCallSteven_Strategy[];
 extern const u8 gText_MatchCallSteven_Pokemon[];
 extern const u8 gText_MatchCallSteven_Intro1_BeforeMeteorFallsBattle[];

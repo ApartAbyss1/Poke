@@ -663,10 +663,6 @@ static void (*const sMatchCall_GetNameAndDescFunctions[])(match_call_t, const u8
 
 static const u8 gText_MatchCallSteven_Strategy[] = _("Attack the weak points!");
 static const u8 gText_MatchCallSteven_Pokemon[] = _("Ultimate STEEL POKéMON.");
-static const u8 gText_MatchCallSteven_Intro1_BeforeMeteorFallsBattle[] = _("I'd climb even waterfalls");
-static const u8 gText_MatchCallSteven_Intro2_BeforeMeteorFallsBattle[] = _("to find a rare stone!");
-static const u8 gText_MatchCallSteven_Intro1_AfterMeteorFallsBattle[] = _("I'm the strongest and most");
-static const u8 gText_MatchCallSteven_Intro2_AfterMeteorFallsBattle[] = _("energetic after all!");
 
 static const u8 gText_MatchCallBrendan_Strategy[] = _("Battle with knowledge!");
 static const u8 gText_MatchCallBrendan_Pokemon[] = _("I will use various POKéMON.");
@@ -686,8 +682,8 @@ static const struct MatchCallCheckPageOverride sCheckPageOverrides[] = {
         .flavorTexts = {
             [CHECK_PAGE_STRATEGY] = gText_MatchCallSteven_Strategy,
             [CHECK_PAGE_POKEMON]  = gText_MatchCallSteven_Pokemon,
-            [CHECK_PAGE_INTRO_1]  = gText_MatchCallSteven_Intro1_BeforeMeteorFallsBattle,
-            [CHECK_PAGE_INTRO_2]  = gText_MatchCallSteven_Intro2_BeforeMeteorFallsBattle
+            [CHECK_PAGE_INTRO_1]  = COMPOUND_STRING("I'd climb even waterfalls"),
+            [CHECK_PAGE_INTRO_2]  = COMPOUND_STRING("to find a rare stone!")
         }
     },
     {
@@ -697,8 +693,8 @@ static const struct MatchCallCheckPageOverride sCheckPageOverrides[] = {
         .flavorTexts = {
             [CHECK_PAGE_STRATEGY] = gText_MatchCallSteven_Strategy,
             [CHECK_PAGE_POKEMON]  = gText_MatchCallSteven_Pokemon,
-            [CHECK_PAGE_INTRO_1]  = gText_MatchCallSteven_Intro1_AfterMeteorFallsBattle,
-            [CHECK_PAGE_INTRO_2]  = gText_MatchCallSteven_Intro2_AfterMeteorFallsBattle
+            [CHECK_PAGE_INTRO_1]  = COMPOUND_STRING("I'm the strongest and most"),
+            [CHECK_PAGE_INTRO_2]  = COMPOUND_STRING("energetic after all!")
         }
     },
     {

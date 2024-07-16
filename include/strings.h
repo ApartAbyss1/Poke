@@ -1045,11 +1045,6 @@ extern const u8 gText_SomeonesPC[];
 extern const u8 gText_PlayersPC[];
 extern const u8 gText_WhichPCShouldBeAccessed[];
 
-extern const u8 gText_PokenavMatchCall_Strategy[];
-extern const u8 gText_PokenavMatchCall_TrainerPokemon[];
-extern const u8 gText_PokenavMatchCall_SelfIntroduction[];
-extern const u8 gText_Number2[];
-
 extern const u8 gText_Petalburg[];
 extern const u8 gText_Slateport[];
 extern const u8 gText_Enter2[];
@@ -2906,20 +2901,6 @@ extern const u8 gText_BeautyContest[];
 extern const u8 gText_CutenessContest[];
 extern const u8 gText_SmartnessContest[];
 extern const u8 gText_ToughnessContest[];
-
-// PokéNav Match Call
-extern const u8 gText_CallCantBeMadeHere[];
-extern const u8 gText_NumberRegistered[];
-extern const u8 gText_NumberOfBattles[];
-extern const u8 gText_Unknown[];
-extern const u8 gText_TrainerCloseBy[];
-
-// PokéNav Menu Handler
-extern const u8 gText_NoRibbonWinners[];
-
-// PokéNav
-extern const u8 gText_NumberIndex[];
-extern const u8 gText_RibbonsF700[];
 
 // use_pokeblock
 extern const u8 gText_Coolness[];

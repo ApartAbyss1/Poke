@@ -25,8 +25,8 @@ AS := $(PREFIX)as
 
 LD := $(PREFIX)ld
 
-MODERNCC := $(PREFIX)gcc
-PATH_MODERNCC := PATH="$(PATH)" $(MODERNCC)
+ARMCC := $(PREFIX)gcc
+PATH_ARMCC := PATH="$(PATH)" $(ARMCC)
 
 ifeq ($(OS),Windows_NT)
 EXE := .exe
@@ -48,10 +48,10 @@ endif
 
 CPP := $(PREFIX)cpp
 
-MODERN_ROM_NAME := pokeemerald.gba
-MODERN_ELF_NAME := $(MODERN_ROM_NAME:.gba=.elf)
-MODERN_MAP_NAME := $(MODERN_ROM_NAME:.gba=.map)
-MODERN_OBJ_DIR_NAME := build/modern
+ROM_NAME := pokeemerald.gba
+ELF_NAME := $(ROM_NAME:.gba=.elf)
+MAP_NAME := $(ROM_NAME:.gba=.map)
+OBJ_DIR_NAME := build/modern
 
 SHELL := bash -o pipefail
 
@@ -59,9 +59,8 @@ ELF = $(ROM:.gba=.elf)
 MAP = $(ROM:.gba=.map)
 SYM = $(ROM:.gba=.sym)
 
-TEST_OBJ_DIR_NAME_MODERN := build/modern-test
+TEST_OBJ_DIR_NAME := build/modern-test
 
-TEST_OBJ_DIR_NAME := $(TEST_OBJ_DIR_NAME_MODERN)
 TESTELF = $(ROM:.gba=-test.elf)
 HEADLESSELF = $(ROM:.gba=-test-headless.elf)
 
@@ -86,7 +85,7 @@ TEST_BUILDDIR = $(OBJ_DIR)/$(TEST_SUBDIR)
 
 ASFLAGS := -mcpu=arm7tdmi --defsym MODERN=1
 
-CC1              = $(shell $(PATH_MODERNCC) --print-prog-name=cc1) -quiet
+CC1              = $(shell $(PATH_ARMCC) --print-prog-name=cc1) -quiet
 override CFLAGS += -mthumb -mthumb-interwork -O2 -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast -std=gnu17 -Werror -Wall -Wno-strict-aliasing -Wno-attribute-alias -Woverride-init
 ifeq ($(ANALYZE),1)
 override CFLAGS += -fanalyzer
@@ -97,9 +96,9 @@ ifneq ($(GITHUB_REPOSITORY_OWNER),rh-hideout)
 override CFLAGS += -Wno-error=unused-variable -Wno-error=unused-const-variable -Wno-error=unused-parameter -Wno-error=unused-function -Wno-error=unused-but-set-parameter -Wno-error=unused-but-set-variable -Wno-error=unused-value -Wno-error=unused-local-typedefs
 endif
 endif
-ROM := $(MODERN_ROM_NAME)
-OBJ_DIR := $(MODERN_OBJ_DIR_NAME)
-LIBPATH := -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libgcc.a))" -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libnosys.a))" -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libc.a))"
+ROM := $(ROM_NAME)
+OBJ_DIR := $(OBJ_DIR_NAME)
+LIBPATH := -L "$(dir $(shell $(PATH_ARMCC) -mthumb -print-file-name=libgcc.a))" -L "$(dir $(shell $(PATH_ARMCC) -mthumb -print-file-name=libnosys.a))" -L "$(dir $(shell $(PATH_ARMCC) -mthumb -print-file-name=libc.a))"
 LIB := $(LIBPATH) -lc -lnosys -lgcc -L../../libagbsyscall -lagbsyscall
 
 ifeq ($(TESTELF),$(MAKECMDGOALS))
@@ -260,12 +259,12 @@ mostlyclean: tidynonmodern tidymodern tidycheck
 tidy: tidymodern tidycheck
 
 tidymodern:
-	rm -f $(MODERN_ROM_NAME) $(MODERN_ELF_NAME) $(MODERN_MAP_NAME)
-	rm -rf $(MODERN_OBJ_DIR_NAME)
+	rm -f $(ROM_NAME) $(ELF_NAME) $(MAP_NAME)
+	rm -rf $(OBJ_DIR_NAME)
 
 tidycheck:
 	rm -f $(TESTELF) $(HEADLESSELF)
-	rm -rf $(TEST_OBJ_DIR_NAME_MODERN)
+	rm -rf $(TEST_OBJ_DIR_NAME)
 
 
 include graphics_file_rules.mk

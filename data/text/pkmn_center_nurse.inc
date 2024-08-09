@@ -49,3 +49,14 @@ gText_ThankYouForWaiting::
 
 gText_WeHopeToSeeYouAgain2::
 	.string "We hope to see you again!$"
+
+
+
+PokeVialHealScript::
+	special HealPlayerParty
+	msgbox PokeVialText, MSGBOX_DEFAULT
+	releaseall
+	end
+
+PokeVialText::
+	.string "Your party was magically cured!$"

@@ -3046,4 +3046,24 @@ extern const u8 gText_PlantBerry[];
 extern const u8 gText_AM[];
 extern const u8 gText_PM[];
 
+// Starter Regions
+extern const u8 gText_KantoStarter[];
+extern const u8 gText_JohtoStarter[];
+extern const u8 gText_HoennStarter[];
+extern const u8 gText_SinnohStarter[];
+extern const u8 gText_UnovaStarter[];
+extern const u8 gText_KalosStarter[];
+extern const u8 gText_AlolaStarter[];
+extern const u8 gText_GalarStarter[];
+extern const u8 gText_PaldeaStarter[];
+
+//PC MENU
+extern const u8 gText_MenuPC[];
+
+//EV/IV EDITOR
+extern const u8 gText_StatEditor[];
+
+//MOVE RELEARNER
+extern const u8 gText_Moves_Menu[];
+
 #endif // GUARD_STRINGS_H

@@ -1502,4 +1502,28 @@ void Task_ItemUse_CloseMessageBoxAndReturnToField_VsSeeker(u8 taskId)
     Task_CloseCantUseKeyItemMessage(taskId);
 }
 
+extern u8 PokeVialHealScript[];
+
+void ItemUseCB_PokeVial (u8 taskId)
+{
+    LockPlayerFieldControls();
+    ScriptContext_SetupScript(PokeVialHealScript);
+    DestroyTask(taskId);
+}
+
+void ItemUseOutOfBattle_PokeVial(u8 taskId)
+{
+    if (!gTasks[taskId].tUsingRegisteredKeyItem)
+    {
+        sItemUseOnFieldCB = ItemUseCB_PokeVial;
+        gFieldCallback = FieldCB_UseItemOnField;
+        gBagMenu->newScreenCallback = CB2_ReturnToField;
+        Task_FadeAndCloseBagMenu(taskId);
+    }
+    else{
+        sItemUseOnFieldCB = ItemUseCB_PokeVial;
+        SetUpItemUseOnFieldCallback(taskId);
+    }
+}
+
 #undef tUsingRegisteredKeyItem

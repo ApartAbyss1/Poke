@@ -109,12 +109,61 @@ static const u8 sStarterLabelCoords[STARTER_MON_COUNT][2] =
     {16, 10},
     {8, 4},
 };
-
-static const u16 sStarterMon[STARTER_MON_COUNT] =
+static const u16 sStarterMonKanto[STARTER_MON_COUNT] =
+{
+    SPECIES_BULBASAUR,
+    SPECIES_CHARMANDER,
+    SPECIES_SQUIRTLE,
+};
+static const u16 sStarterMonJohto[STARTER_MON_COUNT] =
+{
+    SPECIES_CHIKORITA,
+    SPECIES_CYNDAQUIL,
+    SPECIES_TOTODILE,
+};
+static const u16 sStarterMonHoenn[STARTER_MON_COUNT] =
 {
     SPECIES_TREECKO,
     SPECIES_TORCHIC,
     SPECIES_MUDKIP,
+};
+static const u16 sStarterMonSinnoh[STARTER_MON_COUNT] =
+{
+    SPECIES_TURTWIG,
+    SPECIES_CHIMCHAR,
+    SPECIES_PIPLUP,
+};
+
+static const u16 sStarterMonUnova[STARTER_MON_COUNT] =
+{
+    SPECIES_SNIVY,
+    SPECIES_TEPIG,
+    SPECIES_OSHAWOTT,
+};
+static const u16 sStarterMonKalos[STARTER_MON_COUNT] =
+{
+   SPECIES_CHESPIN,
+   SPECIES_FENNEKIN,
+   SPECIES_FROAKIE,
+};
+static const u16 sStarterMonAlola[STARTER_MON_COUNT] =
+{
+   SPECIES_ROWLET,
+   SPECIES_LITTEN,
+   SPECIES_POPPLIO,
+};
+static const u16 sStarterMonPaldea[STARTER_MON_COUNT] =
+{
+   SPECIES_GROOKEY,
+   SPECIES_SCORBUNNY,
+   SPECIES_SOBBLE,
+};
+
+static const u16 sStarterMonGalar[STARTER_MON_COUNT] =
+{
+   SPECIES_SPRIGATITO,
+   SPECIES_FUECOCO,
+   SPECIES_QUAXLY,
 };
 
 static const struct BgTemplate sBgTemplates[3] =
@@ -352,8 +401,31 @@ u16 GetStarterPokemon(u16 chosenStarterId)
 {
     if (chosenStarterId > STARTER_MON_COUNT)
         chosenStarterId = 0;
-    return sStarterMon[chosenStarterId];
+    switch (gSpecialVar_0x800A)
+    {
+    case 0:
+        return sStarterMonKanto[chosenStarterId];
+    case 1:
+        return sStarterMonJohto[chosenStarterId];
+    case 2:
+        return sStarterMonHoenn[chosenStarterId];
+    case 3:
+        return sStarterMonSinnoh[chosenStarterId];
+    case 4:
+        return sStarterMonUnova[chosenStarterId];
+    case 5:
+        return sStarterMonKalos[chosenStarterId];
+    case 6:
+        return sStarterMonAlola[chosenStarterId];
+    case 7:
+        return sStarterMonGalar[chosenStarterId];
+    case 8:
+        return sStarterMonPaldea[chosenStarterId];
+    default:
+        return sStarterMonHoenn[chosenStarterId];
+    } 
 }
+
 
 static void VblankCB_StarterChoose(void)
 {

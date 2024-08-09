@@ -1834,3 +1834,17 @@ const u8 gText_Fertilize[] = _("FERTILIZE");
 const u8 gText_PlantBerry[] = _("PLANT BERRY");
 const u8 gText_AM[] = _("AM");
 const u8 gText_PM[] = _("PM");
+
+const u8 gText_KantoStarter[] = _("KANTO STARTER");
+const u8 gText_JohtoStarter[] = _("JOHTO STARTER");
+const u8 gText_HoennStarter[] = _("HOENN STARTER");
+const u8 gText_SinnohStarter[] = _("SINNOH STARTER");
+const u8 gText_UnovaStarter[] = _("UNOVA STARTER");
+const u8 gText_KalosStarter[] = _("KALOS STARTER");
+const u8 gText_AlolaStarter[] = _("ALOLA STARTER");
+const u8 gText_GalarStarter[] = _("GALAR STARTER");
+const u8 gText_PaldeaStarter[] = _("PALDEA STARTER");
+
+const u8 gText_MenuPC[] = _("PC");
+const u8 gText_StatEditor[] = _("EDIT STATS");
+const u8 gText_Moves_Menu[] = _("Change Moves");

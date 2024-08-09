@@ -75,9 +75,13 @@
 #include "constants/party_menu.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#include "ui_stat_editor.h"
+#include "move_relearner.h"
 
 enum {
     MENU_SUMMARY,
+    MENU_STAT_EDIT,
+    MENU_MOVES,
     MENU_SWITCH,
     MENU_CANCEL1,
     MENU_ITEM,
@@ -206,7 +210,7 @@ struct PartyMenuInternal
     u32 spriteIdCancelPokeball:7;
     u32 messageId:14;
     u8 windowId[3];
-    u8 actions[8];
+    u8 actions[10];
     u8 numActions;
     // In vanilla Emerald, only the first 0xB0 hwords (0x160 bytes) are actually used.
     // However, a full 0x100 hwords (0x200 bytes) are allocated.
@@ -355,7 +359,6 @@ static void Task_UpdateHeldItemSprite(u8);
 static void Task_HandleSelectionMenuInput(u8);
 static void CB2_ShowPokemonSummaryScreen(void);
 static void UpdatePartyToBattleOrder(void);
-static void CB2_ReturnToPartyMenuFromSummaryScreen(void);
 static void SlidePartyMenuBoxOneStep(u8);
 static void Task_SlideSelectedSlotsOffscreen(u8);
 static void SwitchPartyMon(void);
@@ -473,6 +476,8 @@ static void ShiftMoveSlot(struct Pokemon *, u8, u8);
 static void BlitBitmapToPartyWindow_LeftColumn(u8, u8, u8, u8, u8, bool8);
 static void BlitBitmapToPartyWindow_RightColumn(u8, u8, u8, u8, u8, bool8);
 static void CursorCb_Summary(u8);
+static void CursorCb_Moves(u8);
+static void CursorCb_StatEdit(u8);
 static void CursorCb_Switch(u8);
 static void CursorCb_Cancel1(u8);
 static void CursorCb_Item(u8);
@@ -2795,7 +2800,18 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
 
     sPartyMenuInternal->numActions = 0;
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_SUMMARY);
+    AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_STAT_EDIT);
 
+    // Let any Pokemon that learns Fly or Flash use it without knowing the move
+    if (CanTeachMove(&mons[slotId], ITEM_HM_FLY - ITEM_TM_FOCUS_PUNCH))
+    {
+        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, FIELD_MOVE_FLY + MENU_FIELD_MOVES);
+    }
+
+    if (CanTeachMove(&mons[slotId], ITEM_HM_FLASH - ITEM_TM_FOCUS_PUNCH))
+    {
+        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, FIELD_MOVE_FLASH + MENU_FIELD_MOVES);
+    }
     // Add field moves to action list
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
@@ -2813,6 +2829,9 @@ static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
     {
         if (GetMonData(&mons[1], MON_DATA_SPECIES) != SPECIES_NONE)
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_SWITCH);
+        if (GetNumberOfRelearnableMoves(&mons[slotId]) != 0) {
+			AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_MOVES);
+		}
         if (ItemIsMail(GetMonData(&mons[slotId], MON_DATA_HELD_ITEM)))
             AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_MAIL);
         else
@@ -2965,6 +2984,18 @@ static void CursorCb_Summary(u8 taskId)
     Task_ClosePartyMenu(taskId);
 }
 
+static void CursorCb_Moves(u8 taskId)
+{
+    PlaySE(SE_SELECT);
+	FlagSet(FLAG_PARTY_MOVES);
+    gSpecialVar_0x8004 = gPartyMenu.slotId;
+	gSpecialVar_0x8005 = GetNumberOfRelearnableMoves(&gPlayerParty[gSpecialVar_0x8004]);
+	DisplayPartyPokemonDataForRelearner(gSpecialVar_0x8004);
+	TeachMoveRelearnerMove();
+    sPartyMenuInternal->exitCallback = TeachMoveRelearnerMove;
+    Task_ClosePartyMenu(taskId);
+}
+
 static void CB2_ShowPokemonSummaryScreen(void)
 {
     if (gPartyMenu.menuType == PARTY_MENU_TYPE_IN_BATTLE)
@@ -2978,7 +3009,7 @@ static void CB2_ShowPokemonSummaryScreen(void)
     }
 }
 
-static void CB2_ReturnToPartyMenuFromSummaryScreen(void)
+void CB2_ReturnToPartyMenuFromSummaryScreen(void)
 {
     gPaletteFade.bufferTransferDisabled = TRUE;
     gPartyMenu.slotId = gLastViewedMonIndex;
@@ -3918,8 +3949,8 @@ static void CursorCb_FieldMove(u8 taskId)
     }
     else
     {
-        // All field moves before WATERFALL are HMs.
-        if (fieldMove <= FIELD_MOVE_WATERFALL && FlagGet(FLAG_BADGE01_GET + fieldMove) != TRUE)
+        // All field moves before WATERFALL are HMs. Fly no longer has a badge requirement
+        if (fieldMove <= FIELD_MOVE_WATERFALL && FlagGet(FLAG_BADGE01_GET + fieldMove) != TRUE && fieldMove != FIELD_MOVE_FLY)
         {
             DisplayPartyMenuMessage(gText_CantUseUntilNewBadge, TRUE);
             gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
@@ -4418,6 +4449,24 @@ static void UpdatePartyMonAilmentGfx(u8 status, struct PartyMenuBox *menuBox)
         break;
     }
 }
+
+static void ChangePokemonStatsPartyScreen_CB(void)
+{
+    CB2_ReturnToPartyMenuFromSummaryScreen();
+}
+
+static void ChangePokemonStatsPartyScreen(void)
+{
+    StatEditor_Init(ChangePokemonStatsPartyScreen_CB);
+}
+static void CursorCb_StatEdit(u8 taskId)
+{
+    PlaySE(SE_SELECT);
+    gSpecialVar_0x8004 = gPartyMenu.slotId;
+    sPartyMenuInternal->exitCallback = ChangePokemonStatsPartyScreen;
+    Task_ClosePartyMenu(taskId);
+}
+
 
 void LoadPartyMenuAilmentGfx(void)
 {
@@ -7768,3 +7817,4 @@ void IsLastMonThatKnowsSurf(void)
             gSpecialVar_Result = !P_CAN_FORGET_HIDDEN_MOVE;
     }
 }
+

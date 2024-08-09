@@ -247,7 +247,9 @@ LittlerootTown_EventScript_SetRivalBirchPosForDexUpgradeFemale::
 	end
 
 LittlerootTown_EventScript_FatMan::
-	msgbox LittlerootTown_Text_CanUsePCToStoreItems, MSGBOX_NPC
+	giveitem ITEM_POKEVIAL
+	giveitem ITEM_RARE_CANDY, 999
+	releaseall
 	end
 
 LittlerootTown_EventScript_Boy::
